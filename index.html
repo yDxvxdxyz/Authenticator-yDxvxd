@@ -82,7 +82,7 @@
         <div id="login-screen">
             <div class="card">
                 <h1>yDxvxd Auth</h1>
-                <input type="text" id="username" placeholder="Usuário" value="admin">
+                <input type="text" id="username" placeholder="Usuário">
                 <input type="password" id="password" placeholder="Senha">
                 <button onclick="login()">Entrar</button>
                 <p style="text-align:center; margin-top:15px; font-size:14px; color:#64748b;">
@@ -98,7 +98,7 @@
                     <button onclick="logout()" style="width:auto; padding:8px 18px; background:#ef4444; font-size:14px;">Sair</button>
                 </div>
 
-                <h2>1. Insira o segredo Base32</h2>
+                <h2>1. Insira o secret Base32</h2>
                 <textarea id="secret-input" rows="4" placeholder="Cole o código Base32 aqui"></textarea>
                 <button onclick="generateLink()">Gerar Link Temporário (1 hora)</button>
 
