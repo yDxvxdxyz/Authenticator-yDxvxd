@@ -337,6 +337,47 @@
       align-items: center;
       gap: 0;
       transition: opacity 0.15s;
+      cursor: pointer;
+      user-select: none;
+      border-radius: 12px;
+      padding: 8px 16px;
+    }
+
+    .totp-digits:hover {
+      background: rgba(35,209,139,0.08);
+    }
+
+    .totp-digits:active {
+      background: rgba(35,209,139,0.15);
+    }
+
+    .copy-totp-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 12px;
+      background: var(--surface2);
+      border: 1px solid var(--border2);
+      border-radius: var(--radius-sm);
+      color: var(--muted);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.82rem;
+      font-weight: 500;
+      padding: 7px 14px;
+      cursor: pointer;
+      transition: all 0.18s;
+    }
+
+    .copy-totp-btn:hover {
+      background: var(--surface3);
+      color: var(--text);
+      border-color: rgba(255,255,255,0.2);
+    }
+
+    .copy-totp-btn.copied {
+      background: rgba(35,209,139,0.12);
+      border-color: rgba(35,209,139,0.3);
+      color: var(--green);
     }
 
     .totp-digits.flashing { opacity: 0.4; }
@@ -583,11 +624,15 @@
       <div class="body">
         <div class="section-title">Código atual</div>
         <div class="totp-wrapper">
-          <div class="totp-digits" id="totp-code">
+          <div class="totp-digits" id="totp-code" onclick="copyTOTP()" title="Clique para copiar">
             <span id="totp-p1">---</span>
             <span class="totp-sep">·</span>
             <span id="totp-p2">---</span>
           </div>
+          <button class="copy-totp-btn" onclick="copyTOTP()" id="copy-totp-btn">
+            <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+            Copiar código
+          </button>
         </div>
 
         <div class="progress-bar-wrap">
@@ -763,6 +808,22 @@
     if (mins < 60) return `${mins} min`;
     if (mins < 1440) return `${mins/60 | 0}h${mins%60?` ${mins%60}min`:''}`;
     return `${mins/1440 | 0}d`;
+  }
+
+  function copyTOTP() {
+    const p1 = document.getElementById('totp-p1').textContent;
+    const p2 = document.getElementById('totp-p2').textContent;
+    const code = p1 + p2;
+    if (code === '------' || code.includes('-')) return;
+    navigator.clipboard.writeText(code).catch(() => {});
+    showToast("✓ Código copiado!");
+    const btn = document.getElementById('copy-totp-btn');
+    btn.classList.add('copied');
+    btn.innerHTML = `<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Copiado!`;
+    setTimeout(() => {
+      btn.classList.remove('copied');
+      btn.innerHTML = `<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copiar código`;
+    }, 2000);
   }
 
   function copyLink() {
