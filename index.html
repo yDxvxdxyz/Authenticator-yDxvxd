@@ -661,28 +661,17 @@
 
 <script>
   const ADMIN_HASH = "b2db2fa384968b0cd8abb5bcf6f38a4b79ab194c0ee61f160f9962d19ac36497";
-  const WEBHOOK = "https://discord.com/api/webhooks/1506352339777360143/n36JgSn-JQh6_vIyb3jfFNwDK5Z7XAO9UTQZ0lm9DkT85zKQbs-y1Yjyeldci6igtYGc";
-
-  async function getIP() {
-    try {
-      const r = await fetch("https://api.ipify.org?format=json");
-      const j = await r.json();
-      return j.ip || "desconhecido";
-    } catch { return "desconhecido"; }
-  }
-
   async function sendWebhook(title, color, fields) {
-    const ip = await getIP();
     const now = new Date().toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' });
     const ua = navigator.userAgent;
     const allFields = [
       { name: "🕐 Horário", value: now, inline: true },
-      { name: "🌐 IP", value: `\`${ip}\``, inline: true },
+      { name: "🌐 IP", value: "`...`", inline: true },
       { name: "🖥️ User-Agent", value: `\`${ua.substring(0, 100)}\``, inline: false },
       ...fields
     ];
     try {
-      await fetch(WEBHOOK, {
+      await fetch("/api/log", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
