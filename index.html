@@ -1,323 +1,822 @@
 <!DOCTYPE html>
-<html lang="pt-BR" class="dark">
+<html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>yDxvxd Authenticator</title>
+  <title>yDxvxd · Authenticator</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@500;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap');
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0a0a0b;
+      --surface: #111114;
+      --surface2: #18181d;
+      --surface3: #1f1f27;
+      --border: rgba(255,255,255,0.07);
+      --border2: rgba(255,255,255,0.12);
+      --text: #f0f0f4;
+      --muted: #6b6b7a;
+      --accent: #7c6af7;
+      --accent2: #a594f9;
+      --green: #23d18b;
+      --red: #f4645c;
+      --amber: #f4a745;
+      --radius: 16px;
+      --radius-sm: 10px;
+    }
+
+    html, body {
+      height: 100%;
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'DM Sans', system-ui, sans-serif;
+      font-weight: 400;
+      -webkit-font-smoothing: antialiased;
+    }
 
     body {
-      font-family: 'Inter', system-ui, sans-serif;
-      background: linear-gradient(135deg, #1a1a1a, #0d0d0d, #262626);
-      color: #e5e5e5;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       min-height: 100vh;
-      margin: 0;
-      padding: 20px;
+      padding: 24px;
+      background-image:
+        radial-gradient(ellipse 60% 50% at 50% -10%, rgba(124,106,247,0.15) 0%, transparent 70%),
+        radial-gradient(ellipse 40% 30% at 80% 100%, rgba(35,209,139,0.06) 0%, transparent 60%);
+    }
+
+    .wrap {
+      width: 100%;
+      max-width: 480px;
+      animation: fadeUp 0.4s ease both;
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border2);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+
+    .logo-bar {
+      padding: 32px 32px 24px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .logo-icon {
+      width: 36px;
+      height: 36px;
+      background: linear-gradient(135deg, #7c6af7, #a594f9);
+      border-radius: 10px;
       display: flex;
       align-items: center;
       justify-content: center;
     }
-    .container { width: 100%; max-width: 560px; }
 
-    .card {
-      background: rgba(30, 30, 30, 0.95);
-      backdrop-filter: blur(16px);
-      border: 1px solid rgba(128, 128, 128, 0.3);
+    .logo-icon svg {
+      width: 20px;
+      height: 20px;
+      fill: none;
+      stroke: #fff;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .logo-text {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.4rem;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      color: var(--text);
+    }
+
+    .logo-badge {
+      font-size: 0.7rem;
+      font-weight: 500;
+      letter-spacing: 0.06em;
+      color: var(--muted);
+      text-transform: uppercase;
+      background: var(--surface2);
+      border: 1px solid var(--border2);
+      padding: 4px 10px;
       border-radius: 20px;
-      overflow: hidden;
-      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
-    }
-    .header {
-      text-align: center;
-      padding: 32px 0 20px 0;
-      border-bottom: 1px solid rgba(128, 128, 128, 0.2);
-    }
-    h1 {
-      font-family: 'Space Grotesk', sans-serif;
-      font-size: 2rem;
-      color: #f5f5f5;
-      margin: 0;
-      font-weight: 700;
-    }
-    .subtitle {
-      color: #a3a3a3;
-      font-size: 0.95rem;
-      margin-top: 6px;
     }
 
-    .content { padding: 32px; }
+    .body { padding: 28px 32px 32px; }
 
-    input, textarea {
+    .field-group { margin-bottom: 18px; }
+
+    label {
+      display: block;
+      font-size: 0.78rem;
+      font-weight: 500;
+      letter-spacing: 0.04em;
+      color: var(--muted);
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+
+    input[type="text"],
+    input[type="password"],
+    input[type="number"],
+    textarea,
+    select {
       width: 100%;
-      padding: 16px;
-      background: rgba(50, 50, 50, 0.9);
-      border: 1px solid rgba(96, 96, 96, 0.4);
-      border-radius: 12px;
-      color: #f5f5f5;
-      margin-bottom: 16px;
-      font-size: 1rem;
-      transition: all 0.2s;
-    }
-    input:focus, textarea:focus {
+      background: var(--surface2);
+      border: 1px solid var(--border2);
+      border-radius: var(--radius-sm);
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.95rem;
+      padding: 13px 16px;
+      transition: border-color 0.2s, background 0.2s;
       outline: none;
-      border-color: #6b7280;
-      background: rgba(60, 60, 60, 0.95);
+      appearance: none;
     }
-    textarea { resize: vertical; min-height: 110px; }
 
-    button {
+    input:focus, textarea:focus, select:focus {
+      border-color: var(--accent);
+      background: var(--surface3);
+    }
+
+    input::placeholder, textarea::placeholder { color: var(--muted); }
+
+    textarea { resize: vertical; min-height: 100px; font-family: 'DM Mono', monospace; font-size: 0.85rem; }
+
+    .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+    .btn {
       width: 100%;
-      padding: 16px;
-      background: rgba(75, 75, 75, 0.95);
-      color: #f5f5f5;
+      padding: 14px 20px;
       border: none;
-      border-radius: 12px;
-      font-size: 1.05rem;
-      font-weight: 600;
+      border-radius: var(--radius-sm);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.95rem;
+      font-weight: 500;
       cursor: pointer;
-      transition: all 0.2s;
-      margin: 8px 0;
-    }
-    button:hover {
-      background: rgba(96, 96, 96, 0.95);
-      transform: translateY(-2px);
-    }
-    button.primary {
-      background: #3b82f6;
-    }
-    button.primary:hover {
-      background: #2563eb;
+      transition: all 0.18s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
     }
 
-    .result {
-      margin-top: 20px;
-      padding: 20px;
-      background: rgba(45, 45, 45, 0.8);
-      border: 1px solid rgba(96, 96, 96, 0.4);
-      border-radius: 12px;
-    }
-    .secret {
-      font-family: 'Space Grotesk', monospace;
-      background: rgba(20, 20, 20, 0.8);
-      padding: 18px;
-      border-radius: 10px;
-      font-size: 1.05rem;
-      word-break: break-all;
-      border: 1px solid rgba(128, 128, 128, 0.3);
-    }
-    .totp {
-      font-family: 'Space Grotesk', monospace;
-      font-size: 3.2rem;
-      font-weight: 700;
-      letter-spacing: 12px;
-      text-align: center;
-      color: #22c55e;
-      margin: 24px 0;
-      user-select: none;
-    }
-    .time-left {
-      text-align: center;
-      color: #a3a3a3;
-      font-size: 0.95rem;
+    .btn-primary {
+      background: linear-gradient(135deg, #7c6af7, #a594f9);
+      color: #fff;
     }
 
-    .hidden { display: none; }
-    .logout-btn {
-      background: #ef4444;
-      font-size: 0.95rem;
-      padding: 10px 18px;
+    .btn-primary:hover { opacity: 0.88; transform: translateY(-1px); }
+    .btn-primary:active { transform: translateY(0); opacity: 1; }
+
+    .btn-ghost {
+      background: var(--surface2);
+      color: var(--text);
+      border: 1px solid var(--border2);
+    }
+
+    .btn-ghost:hover { background: var(--surface3); border-color: rgba(255,255,255,0.2); }
+
+    .btn-danger {
+      background: rgba(244,100,92,0.12);
+      color: var(--red);
+      border: 1px solid rgba(244,100,92,0.25);
       width: auto;
+      padding: 9px 16px;
+      font-size: 0.85rem;
     }
+
+    .btn-danger:hover { background: rgba(244,100,92,0.2); }
+
+    .mt { margin-top: 12px; }
+    .mt2 { margin-top: 20px; }
+
+    .section-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 16px;
+    }
+
+    .result-box {
+      background: var(--surface2);
+      border: 1px solid var(--border2);
+      border-radius: var(--radius-sm);
+      padding: 16px;
+      margin-top: 20px;
+    }
+
+    .result-label {
+      font-size: 0.75rem;
+      font-weight: 500;
+      letter-spacing: 0.06em;
+      color: var(--muted);
+      text-transform: uppercase;
+      margin-bottom: 10px;
+    }
+
+    .link-row {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .link-row input {
+      flex: 1;
+      font-family: 'DM Mono', monospace;
+      font-size: 0.78rem;
+      padding: 10px 12px;
+      margin: 0;
+      color: var(--accent2);
+    }
+
+    .copy-btn {
+      background: var(--surface3);
+      border: 1px solid var(--border2);
+      border-radius: var(--radius-sm);
+      color: var(--text);
+      padding: 10px 14px;
+      cursor: pointer;
+      font-size: 0.85rem;
+      white-space: nowrap;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.18s;
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 500;
+    }
+
+    .copy-btn:hover { background: var(--accent); border-color: var(--accent); }
+
+    .copy-btn svg {
+      width: 15px; height: 15px;
+      fill: none; stroke: currentColor;
+      stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;
+    }
+
+    .exp-info {
+      font-size: 0.8rem;
+      color: var(--muted);
+      margin-top: 8px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .exp-info svg {
+      width: 13px; height: 13px;
+      fill: none; stroke: currentColor;
+      stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;
+    }
+
+    .hidden { display: none !important; }
+
+    /* ── View mode ── */
+    .secret-block {
+      background: var(--surface2);
+      border: 1px solid var(--border2);
+      border-radius: var(--radius-sm);
+      padding: 16px;
+      font-family: 'DM Mono', monospace;
+      font-size: 0.9rem;
+      word-break: break-all;
+      color: var(--accent2);
+      letter-spacing: 0.04em;
+      position: relative;
+    }
+
+    .copy-secret {
+      position: absolute;
+      top: 10px; right: 10px;
+      background: var(--surface3);
+      border: 1px solid var(--border2);
+      border-radius: 6px;
+      color: var(--muted);
+      cursor: pointer;
+      padding: 5px 8px;
+      font-size: 0.75rem;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      transition: all 0.15s;
+    }
+
+    .copy-secret:hover { color: var(--text); border-color: rgba(255,255,255,0.2); }
+
+    .totp-wrapper {
+      text-align: center;
+      padding: 28px 0 20px;
+    }
+
+    .totp-digits {
+      font-family: 'DM Mono', monospace;
+      font-size: 3.8rem;
+      font-weight: 500;
+      letter-spacing: 14px;
+      color: var(--green);
+      display: inline-flex;
+      align-items: center;
+      gap: 0;
+      transition: opacity 0.15s;
+    }
+
+    .totp-digits.flashing { opacity: 0.4; }
+
+    .totp-sep {
+      font-size: 2.5rem;
+      color: var(--border2);
+      margin: 0 4px;
+      letter-spacing: 0;
+    }
+
+    .progress-bar-wrap {
+      width: 100%;
+      height: 3px;
+      background: var(--surface3);
+      border-radius: 2px;
+      margin: 12px 0 8px;
+      overflow: hidden;
+    }
+
+    .progress-bar {
+      height: 100%;
+      background: var(--green);
+      border-radius: 2px;
+      transition: width 1s linear, background 0.5s;
+    }
+
+    .timer-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.8rem;
+      color: var(--muted);
+    }
+
+    .timer-dot {
+      display: inline-block;
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: var(--green);
+      margin-right: 6px;
+      animation: pulse 1.5s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.3; }
+    }
+
+    .exp-countdown {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.85rem;
+      color: var(--amber);
+    }
+
+    .divider {
+      height: 1px;
+      background: var(--border);
+      margin: 20px 0;
+    }
+
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(60px);
+      background: var(--surface3);
+      border: 1px solid var(--border2);
+      color: var(--text);
+      padding: 12px 20px;
+      border-radius: 30px;
+      font-size: 0.9rem;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1);
+      z-index: 9999;
+      pointer-events: none;
+      white-space: nowrap;
+    }
+
+    .toast.show { transform: translateX(-50%) translateY(0); }
+
+    .duration-row {
+      display: grid;
+      grid-template-columns: 1fr 120px;
+      gap: 12px;
+      align-items: end;
+      margin-bottom: 18px;
+    }
+
+    select {
+      cursor: pointer;
+      color: var(--text);
+    }
+
+    select option {
+      background: var(--surface2);
+      color: var(--text);
+    }
+
+    .link-exp-note {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 0.78rem;
+      color: var(--muted);
+      background: var(--surface3);
+      border-radius: 6px;
+      padding: 4px 10px;
+      margin-top: 10px;
+    }
+
+    .err-banner {
+      background: rgba(244,100,92,0.1);
+      border: 1px solid rgba(244,100,92,0.25);
+      border-radius: var(--radius-sm);
+      color: var(--red);
+      padding: 12px 16px;
+      font-size: 0.88rem;
+      margin-bottom: 16px;
+      display: none;
+      align-items: center;
+      gap: 8px;
+    }
+    .err-banner.show { display: flex; }
   </style>
 </head>
 <body>
-  <div class="container">
+<div class="wrap">
 
-    <div id="login-screen">
-      <div class="card">
-        <div class="header">
-          <h1>yDxvxd</h1>
-          <p class="subtitle">Authenticator System</p>
-        </div>
-        <div class="content">
-          <input type="text" id="username" value="admin" placeholder="Usuário">
-          <input type="password" id="password" placeholder="Senha">
-          <button class="primary" onclick="login()">Entrar</button>
-        </div>
-      </div>
-    </div>
-
-    <div id="main-app" class="hidden">
-      <div class="card">
-        <div class="header" style="display: flex; justify-content: space-between; align-items: center; padding: 20px 32px 10px;">
-          <div>
-            <h1>yDxvxd</h1>
-            <p class="subtitle">Link Temporário</p>
+  <!-- LOGIN -->
+  <div id="login-screen">
+    <div class="card">
+      <div class="logo-bar">
+        <div class="logo">
+          <div class="logo-icon">
+            <svg viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/><circle cx="12" cy="16" r="1.5" fill="white" stroke="none"/></svg>
           </div>
-          <button onclick="logout()" class="logout-btn">Sair</button>
+          <span class="logo-text">yDxvxd</span>
         </div>
-        
-        <div class="content">
-          <h3 style="margin: 0 0 16px 0; color: #f5f5f5;">Gerar Link Temporário</h3>
-          <textarea id="secret-input" placeholder="Cole o segredo Base32 aqui..."></textarea>
-          <button class="primary" onclick="generateLink()">Gerar Link (válido por 1 hora)</button>
-
-          <div id="link-result" class="result hidden">
-            <strong style="color:#a3a3a3;">Link gerado:</strong>
-            <input type="text" id="generated-link" readonly>
-            <button onclick="copyLink()">📋 Copiar Link</button>
-          </div>
+        <span class="logo-badge">Authenticator</span>
+      </div>
+      <div class="body">
+        <div class="err-banner" id="login-err">
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          Usuário ou senha incorretos.
         </div>
+        <div class="field-group">
+          <label>Usuário</label>
+          <input type="text" id="username">
+        </div>
+        <div class="field-group">
+          <label>Senha</label>
+          <input type="password" id="password" autocomplete="current-password" onkeydown="if(event.key==='Enter')login()">
+        </div>
+        <button class="btn btn-primary mt" onclick="login()">
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+          Entrar
+        </button>
       </div>
     </div>
-
-    <div id="view-mode" class="hidden">
-      <div class="card">
-        <div class="header">
-          <h1>yDxvxd</h1>
-          <p class="subtitle">Segredo Compartilhado</p>
-        </div>
-        <div class="content">
-          <h3>Segredo Base32</h3>
-          <div id="secret-display" class="secret"></div>
-          
-          <h3 style="margin-top: 28px;">Código TOTP</h3>
-          <div id="totp-code" class="totp">------</div>
-          <div id="time-left" class="time-left">Expira em --:--</div>
-        </div>
-      </div>
-    </div>
-
   </div>
 
-  <script>
-    const ADMIN_HASH = "a0f8e4c9b2d7e5f1a3b6c8d9e0f2a4b7c1d3e5f6a8b0c2d4e6f8a0b2c4d6e8f";
+  <!-- MAIN APP -->
+  <div id="main-app" class="hidden">
+    <div class="card">
+      <div class="logo-bar">
+        <div class="logo">
+          <div class="logo-icon">
+            <svg viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/><circle cx="12" cy="16" r="1.5" fill="white" stroke="none"/></svg>
+          </div>
+          <span class="logo-text">yDxvxd</span>
+        </div>
+        <button class="btn btn-danger" onclick="logout()">
+          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+          Sair
+        </button>
+      </div>
+      <div class="body">
+        <div class="section-title">Gerar link temporário</div>
 
-    async function hashPassword(password) {
-      const encoder = new TextEncoder();
-      const data = encoder.encode(password);
-      const hash = await crypto.subtle.digest('SHA-256', data);
-      return Array.from(new Uint8Array(hash)).map(b => b.toString(16).padStart(2,'0')).join('');
+        <div class="field-group">
+          <label>Segredo Base32</label>
+          <textarea id="secret-input" placeholder="Cole o segredo TOTP em Base32 aqui…"></textarea>
+        </div>
+
+        <div class="duration-row">
+          <div>
+            <label>Duração do link</label>
+            <select id="duration-preset" onchange="syncDurationPreset()">
+              <option value="15">15 minutos</option>
+              <option value="30">30 minutos</option>
+              <option value="60" selected>1 hora</option>
+              <option value="180">3 horas</option>
+              <option value="360">6 horas</option>
+              <option value="720">12 horas</option>
+              <option value="1440">24 horas</option>
+              <option value="custom">Personalizado…</option>
+            </select>
+          </div>
+          <div id="custom-min-wrap" class="hidden">
+            <label>Minutos</label>
+            <input type="number" id="custom-minutes" value="60" min="1" max="10080" placeholder="min">
+          </div>
+        </div>
+
+        <button class="btn btn-primary" onclick="generateLink()">
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+          Gerar Link
+        </button>
+
+        <div id="link-result" class="result-box hidden">
+          <div class="result-label">Link gerado</div>
+          <div class="link-row">
+            <input type="text" id="generated-link" readonly>
+            <button class="copy-btn" onclick="copyLink()">
+              <svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+              Copiar
+            </button>
+          </div>
+          <div id="link-exp-label" class="link-exp-note">
+            <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            <span id="link-exp-text"></span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- VIEW MODE -->
+  <div id="view-mode" class="hidden">
+    <div class="card">
+      <div class="logo-bar">
+        <div class="logo">
+          <div class="logo-icon">
+            <svg viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/><circle cx="12" cy="16" r="1.5" fill="white" stroke="none"/></svg>
+          </div>
+          <span class="logo-text">yDxvxd</span>
+        </div>
+        <span class="logo-badge">Compartilhado</span>
+      </div>
+      <div class="body">
+        <div class="section-title">Segredo Base32</div>
+        <div class="secret-block" id="secret-display">
+          <button class="copy-secret" onclick="copySecret()" title="Copiar segredo">
+            <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+            Copiar
+          </button>
+          <span id="secret-text"></span>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="section-title">Código TOTP atual</div>
+        <div class="totp-wrapper">
+          <div class="totp-digits" id="totp-code">
+            <span id="totp-p1">---</span>
+            <span class="totp-sep">·</span>
+            <span id="totp-p2">---</span>
+          </div>
+        </div>
+
+        <div class="progress-bar-wrap">
+          <div class="progress-bar" id="totp-bar"></div>
+        </div>
+        <div class="timer-row">
+          <span><span class="timer-dot"></span> Atualizando a cada 30s</span>
+          <span id="totp-secs" style="font-family:'DM Mono',monospace; font-size:0.8rem; color:var(--muted)">--s</span>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="timer-row">
+          <span style="color:var(--muted); font-size:0.82rem;">Link expira em</span>
+          <span class="exp-countdown" id="exp-countdown">--:--:--</span>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+  const ADMIN_HASH = "a0f8e4c9b2d7e5f1a3b6c8d9e0f2a4b7c1d3e5f6a8b0c2d4e6f8a0b2c4d6e8f";
+
+  async function sha256(str) {
+    const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+    return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
+  }
+
+  async function login() {
+    const user = document.getElementById('username').value.trim();
+    const pass = document.getElementById('password').value;
+    const err = document.getElementById('login-err');
+    err.classList.remove('show');
+
+    if (user !== "admin" || await sha256(pass) !== ADMIN_HASH) {
+      err.classList.add('show');
+      document.getElementById('password').value = '';
+      return;
     }
+    show('main-app');
+    hide('login-screen');
+  }
 
-    async function login() {
-      const user = document.getElementById('username').value.trim();
-      const pass = document.getElementById('password').value;
+  function logout() {
+    hide('main-app');
+    show('login-screen');
+    document.getElementById('password').value = '';
+    document.getElementById('login-err').classList.remove('show');
+  }
 
-      if (user !== "admin" || await hashPassword(pass) !== ADMIN_HASH) {
-        alert("Credenciais inválidas");
+  function syncDurationPreset() {
+    const sel = document.getElementById('duration-preset').value;
+    document.getElementById('custom-min-wrap').classList.toggle('hidden', sel !== 'custom');
+  }
+
+  function getDurationMs() {
+    const sel = document.getElementById('duration-preset').value;
+    const mins = sel === 'custom'
+      ? parseInt(document.getElementById('custom-minutes').value) || 60
+      : parseInt(sel);
+    return mins * 60 * 1000;
+  }
+
+  function base32Decode(input) {
+    const alpha = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567";
+    input = input.replace(/\s/g, '').replace(/=+$/, '').toUpperCase();
+    let bits = "";
+    for (const ch of input) {
+      const v = alpha.indexOf(ch);
+      if (v === -1) continue;
+      bits += v.toString(2).padStart(5, '0');
+    }
+    const bytes = [];
+    for (let i = 0; i + 8 <= bits.length; i += 8)
+      bytes.push(parseInt(bits.substr(i, 8), 2));
+    return new Uint8Array(bytes);
+  }
+
+  async function generateTOTP(base32Secret) {
+    try {
+      const key = base32Decode(base32Secret);
+      const t = Math.floor(Date.now() / 1000 / 30);
+      const buf = new ArrayBuffer(8);
+      new DataView(buf).setBigUint64(0, BigInt(t), false);
+      const ck = await crypto.subtle.importKey("raw", key, { name:"HMAC", hash:"SHA-1" }, false, ["sign"]);
+      const hmac = new Uint8Array(await crypto.subtle.sign("HMAC", ck, buf));
+      const off = hmac[hmac.length-1] & 0xf;
+      const bin = ((hmac[off]&0x7f)<<24)|((hmac[off+1]&0xff)<<16)|((hmac[off+2]&0xff)<<8)|(hmac[off+3]&0xff);
+      return (bin % 1000000).toString().padStart(6, '0');
+    } catch { return "ERRO!"; }
+  }
+
+  function generateLink() {
+    const secret = document.getElementById('secret-input').value.trim();
+    if (!secret) { showToast("⚠ Cole o segredo Base32!"); return; }
+
+    const ms = getDurationMs();
+    const exp = Date.now() + ms;
+    const encoded = btoa(JSON.stringify({ s: secret, exp }));
+
+    const url = new URL(window.location.href);
+    url.search = '';
+    url.searchParams.set('d', encoded);
+
+    document.getElementById('generated-link').value = url.toString();
+    document.getElementById('link-result').classList.remove('hidden');
+
+    const mins = Math.round(ms / 60000);
+    const expDate = new Date(exp);
+    document.getElementById('link-exp-text').textContent =
+      `Válido por ${formatDur(mins)} · expira às ${expDate.toLocaleTimeString('pt-BR', {hour:'2-digit',minute:'2-digit'})}`;
+  }
+
+  function formatDur(mins) {
+    if (mins < 60) return `${mins} min`;
+    if (mins < 1440) return `${mins/60 | 0}h${mins%60?` ${mins%60}min`:''}`;
+    return `${mins/1440 | 0}d`;
+  }
+
+  function copyLink() {
+    const v = document.getElementById('generated-link').value;
+    navigator.clipboard.writeText(v).then(() => showToast("✓ Link copiado!")).catch(() => {
+      document.getElementById('generated-link').select();
+      document.execCommand('copy');
+      showToast("✓ Link copiado!");
+    });
+  }
+
+  function copySecret() {
+    const v = document.getElementById('secret-text').textContent;
+    navigator.clipboard.writeText(v).then(() => showToast("✓ Segredo copiado!")).catch(() => showToast("Erro ao copiar"));
+  }
+
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    clearTimeout(t._to);
+    t._to = setTimeout(() => t.classList.remove('show'), 2500);
+  }
+
+  function show(id) { document.getElementById(id).classList.remove('hidden'); }
+  function hide(id) { document.getElementById(id).classList.add('hidden'); }
+
+  let viewInterval = null;
+
+  async function initViewMode(secret, exp) {
+    hide('login-screen'); hide('main-app'); show('view-mode');
+    document.getElementById('secret-text').textContent = secret;
+
+    async function tick() {
+      const code = await generateTOTP(secret);
+      const p1 = code.slice(0, 3), p2 = code.slice(3);
+
+      const d = document.getElementById('totp-code');
+      d.classList.add('flashing');
+      setTimeout(() => {
+        document.getElementById('totp-p1').textContent = p1;
+        document.getElementById('totp-p2').textContent = p2;
+        d.classList.remove('flashing');
+      }, 150);
+
+      const now = Math.floor(Date.now() / 1000);
+      const secsInPeriod = now % 30;
+      const remaining = 30 - secsInPeriod;
+      const pct = (remaining / 30) * 100;
+      const bar = document.getElementById('totp-bar');
+      bar.style.width = pct + '%';
+      bar.style.background = remaining <= 7 ? 'var(--amber)' : remaining <= 4 ? 'var(--red)' : 'var(--green)';
+      document.getElementById('totp-secs').textContent = remaining + 's';
+
+      const remMs = exp - Date.now();
+      if (remMs <= 0) {
+        clearInterval(viewInterval);
+        showToast("⚠ Este link expirou!");
+        setTimeout(() => { window.location.search = ''; }, 2000);
         return;
       }
-
-      document.getElementById('login-screen').classList.add('hidden');
-      document.getElementById('main-app').classList.remove('hidden');
+      const s = Math.floor(remMs / 1000);
+      const hh = String(Math.floor(s/3600)).padStart(2,'0');
+      const mm = String(Math.floor((s%3600)/60)).padStart(2,'0');
+      const ss = String(s%60).padStart(2,'0');
+      document.getElementById('exp-countdown').textContent = `${hh}:${mm}:${ss}`;
+      document.getElementById('exp-countdown').style.color =
+        s < 300 ? 'var(--red)' : s < 900 ? 'var(--amber)' : 'var(--accent2)';
     }
 
-    function logout() {
-      document.getElementById('main-app').classList.add('hidden');
-      document.getElementById('login-screen').classList.remove('hidden');
-      document.getElementById('password').value = '';
-    }
+    await tick();
+    viewInterval = setInterval(tick, 1000);
+  }
 
-    function base32Decode(input) {
-      const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567";
-      input = input.replace(/=+$/, '').toUpperCase();
-      let bits = "";
-      for (let i = 0; i < input.length; i++) {
-        const val = alphabet.indexOf(input[i]);
-        if (val === -1) continue;
-        bits += val.toString(2).padStart(5, '0');
+  async function checkViewLink() {
+    const params = new URLSearchParams(window.location.search);
+    const encoded = params.get('d');
+    if (!encoded) return;
+
+    try {
+      const data = JSON.parse(atob(encoded));
+      if (!data.s || !data.exp) throw new Error("Dados inválidos");
+      if (Date.now() > data.exp) {
+        showToast("⚠ Este link expirou!");
+        setTimeout(() => { window.location.search = ''; }, 2500);
+        return;
       }
-      let bytes = [];
-      for (let i = 0; i + 8 <= bits.length; i += 8) {
-        bytes.push(parseInt(bits.substr(i, 8), 2));
-      }
-      return new Uint8Array(bytes);
+      await initViewMode(data.s, data.exp);
+    } catch(e) {
+      showToast("Link inválido ou corrompido.");
+      setTimeout(() => { window.location.search = ''; }, 2500);
     }
+  }
 
-    async function generateTOTP(base32Secret) {
-      try {
-        const keyBytes = base32Decode(base32Secret);
-        const epoch = Math.floor(Date.now() / 1000);
-        const timeCounter = Math.floor(epoch / 30);
-
-        const counterBuffer = new ArrayBuffer(8);
-        new DataView(counterBuffer).setBigUint64(0, BigInt(timeCounter), false);
-
-        const cryptoKey = await crypto.subtle.importKey("raw", keyBytes, { name: "HMAC", hash: "SHA-1" }, false, ["sign"]);
-        const hmac = await crypto.subtle.sign("HMAC", cryptoKey, counterBuffer);
-        const hmacArray = new Uint8Array(hmac);
-
-        const offset = hmacArray[hmacArray.length - 1] & 0xf;
-        const binary = ((hmacArray[offset] & 0x7f) << 24) |
-                       ((hmacArray[offset + 1] & 0xff) << 16) |
-                       ((hmacArray[offset + 2] & 0xff) << 8) |
-                       (hmacArray[offset + 3] & 0xff);
-
-        return (binary % 1000000).toString().padStart(6, '0');
-      } catch (e) { return "ERRO"; }
-    }
-
-    function generateLink() {
-      const secret = document.getElementById('secret-input').value.trim();
-      if (!secret) return alert("Digite o segredo Base32!");
-
-      const exp = Date.now() + 60 * 60 * 1000;
-      const data = { s: secret, exp: exp };
-      const encoded = btoa(JSON.stringify(data));
-
-      const url = new URL(window.location.href);
-      url.searchParams.set('d', encoded);
-
-      document.getElementById('generated-link').value = url.toString();
-      document.getElementById('link-result').classList.remove('hidden');
-    }
-
-    function copyLink() {
-      const link = document.getElementById('generated-link');
-      link.select();
-      document.execCommand('copy');
-      alert("✅ Link copiado!");
-    }
-
-    async function checkViewLink() {
-      const params = new URLSearchParams(window.location.search);
-      const encoded = params.get('d');
-      if (!encoded) return;
-
-      try {
-        const data = JSON.parse(atob(encoded));
-        if (Date.now() > data.exp) {
-          alert("Este link expirou!");
-          window.location.search = '';
-          return;
-        }
-
-        document.getElementById('login-screen').classList.add('hidden');
-        document.getElementById('main-app').classList.add('hidden');
-        document.getElementById('view-mode').classList.remove('hidden');
-
-        document.getElementById('secret-display').textContent = data.s;
-
-        async function update() {
-          const code = await generateTOTP(data.s);
-          document.getElementById('totp-code').textContent = code;
-
-          const remaining = Math.floor((data.exp - Date.now()) / 1000);
-          const min = Math.floor(remaining / 60);
-          const sec = remaining % 60;
-          document.getElementById('time-left').textContent = `Expira em ${min}:${sec.toString().padStart(2, '0')}`;
-        }
-
-        update();
-        setInterval(update, 1000);
-      } catch(e) {
-        alert("Link inválido");
-      }
-    }
-
-    window.onload = checkViewLink;
-  </script>
+  window.onload = checkViewLink;
+</script>
 </body>
 </html>
