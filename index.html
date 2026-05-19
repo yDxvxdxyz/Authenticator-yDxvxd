@@ -581,18 +581,7 @@
         <span class="logo-badge">Compartilhado</span>
       </div>
       <div class="body">
-        <div class="section-title">Segredo Base32</div>
-        <div class="secret-block" id="secret-display">
-          <button class="copy-secret" onclick="copySecret()" title="Copiar segredo">
-            <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
-            Copiar
-          </button>
-          <span id="secret-text"></span>
-        </div>
-
-        <div class="divider"></div>
-
-        <div class="section-title">Código TOTP atual</div>
+        <div class="section-title">Código atual</div>
         <div class="totp-wrapper">
           <div class="totp-digits" id="totp-code">
             <span id="totp-p1">---</span>
@@ -733,11 +722,6 @@
     });
   }
 
-  function copySecret() {
-    const v = document.getElementById('secret-text').textContent;
-    navigator.clipboard.writeText(v).then(() => showToast("✓ Segredo copiado!")).catch(() => showToast("Erro ao copiar"));
-  }
-
   function showToast(msg) {
     const t = document.getElementById('toast');
     t.textContent = msg;
@@ -753,7 +737,6 @@
 
   async function initViewMode(secret, exp) {
     hide('login-screen'); hide('main-app'); show('view-mode');
-    document.getElementById('secret-text').textContent = secret;
 
     async function tick() {
       const code = await generateTOTP(secret);
