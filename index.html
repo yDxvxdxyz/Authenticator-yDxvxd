@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>yDxvxd Auth</title>
+    <style>
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: #0f172a;
+            color: #e2e8f0;
+        }
+        .container {
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 20px;
+        }
+        .card {
+            background: #1e2937;
+            padding: 40px;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+        h1 { 
+            text-align: center; 
+            margin-bottom: 30px;
+            font-size: 28px;
+        }
+        input, textarea {
+            width: 100%;
+            padding: 14px;
+            margin: 10px 0;
+            background: #334155;
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-size: 16px;
+        }
+        button {
+            width: 100%;
+            padding: 14px;
+            background: #3b82f6;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        button:hover { background: #2563eb; }
+        .hidden { display: none; }
+        .result { 
+            margin-top: 20px; 
+            padding: 15px; 
+            background: #0f172a; 
+            border-radius: 8px; 
+            word-break: break-all; 
+        }
+        .secret { 
+            font-family: monospace; 
+            font-size: 17px; 
+            background: #1e2937; 
+            padding: 15px; 
+            border-radius: 8px; 
+            margin: 15px 0; 
+            word-break: break-all;
+        }
+        .totp { 
+            font-size: 42px; 
+            font-weight: bold; 
+            letter-spacing: 8px; 
+            color: #22c55e; 
+            text-align: center;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div id="login-screen">
+            <div class="card">
+                <h1>yDxvxd Auth</h1>
+                <input type="text" id="username" placeholder="Usuário" value="admin">
+                <input type="password" id="password" placeholder="Senha">
+                <button onclick="login()">Entrar</button>
+                <p style="text-align:center; margin-top:15px; font-size:14px; color:#64748b;">
+                    Acesso restrito
+                </p>
+            </div>
+        </div>
+
+        <div id="main-app" class="hidden">
+            <div class="card">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:25px;">
+                    <h1>yDxvxd Auth</h1>
+                    <button onclick="logout()" style="width:auto; padding:8px 18px; background:#ef4444; font-size:14px;">Sair</button>
+                </div>
+
+                <h2>1. Insira o segredo Base32</h2>
+                <textarea id="secret-input" rows="4" placeholder="Cole o código Base32 aqui"></textarea>
+                <button onclick="generateLink()">Gerar Link Temporário (1 hora)</button>
+
+                <div id="link-result" class="result hidden">
+                    <strong>Link gerado com sucesso!</strong><br><br>
+                    <input type="text" id="generated-link" readonly style="background:#0f172a; font-size:15px;">
+                    <button onclick="copyLink()" style="width:auto; margin-top:10px;">Copiar Link</button>
+                </div>
+
+                <hr style="margin: 40px 0; border-color:#334155;">
+
+                <button onclick="window.location.reload()" style="background:#64748b;">
+                    ← Voltar ao Início
+                </button>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        const ADMIN_HASH = "a0f8e4c9b2d7e5f1a3b6c8d9e0f2a4b7c1d3e5f6a8b0c2d4e6f8a0b2c4d6e8f";
+
+        async function hashPassword(password) {
+            const encoder = new TextEncoder();
+            const data = encoder.encode(password);
+            const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+            return Array.from(new Uint8Array(hashBuffer))
+                        .map(b => b.toString(16).padStart(2, '0'))
+                        .join('');
+        }
+
+        async function login() {
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value;
+
+            if (username !== "admin") return alert("Usuário inválido");
+
+            if (await hashPassword(password) === ADMIN_HASH) {
+                document.getElementById('login-screen').classList.add('hidden');
+                document.getElementById('main-app').classList.remove('hidden');
+            } else {
+                alert("Senha incorreta");
+            }
+        }
+
+        function logout() {
+            document.getElementById('main-app').classList.add('hidden');
+            document.getElementById('login-screen').classList.remove('hidden');
+            document.getElementById('password').value = '';
+        }
+
+        function base32Decode(input) {
+            const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567";
+            input = input.replace(/=+$/, '').toUpperCase();
+            let bits = "";
+            for (let i = 0; i < input.length; i++) {
+                const val = alphabet.indexOf(input[i]);
+                if (val === -1) continue;
+                bits += val.toString(2).padStart(5, '0');
+            }
+            let bytes = [];
+            for (let i = 0; i + 8 <= bits.length; i += 8) {
+                bytes.push(parseInt(bits.substr(i, 8), 2));
+            }
+            return new Uint8Array(bytes);
+        }
+
+        async function generateTOTP(base32Secret) {
+            try {
+                const keyBytes = base32Decode(base32Secret);
+                const epoch = Math.floor(Date.now() / 1000);
+                const timeCounter = Math.floor(epoch / 30);
+                
+                const counterBuffer = new ArrayBuffer(8);
+                new DataView(counterBuffer).setBigUint64(0, BigInt(timeCounter), false);
+                
+                const cryptoKey = await crypto.subtle.importKey("raw", keyBytes, { name: "HMAC", hash: "SHA-1" }, false, ["sign"]);
+                const hmac = await crypto.subtle.sign("HMAC", cryptoKey, counterBuffer);
+                const hmacArray = new Uint8Array(hmac);
+                
+                const offset = hmacArray[hmacArray.length - 1] & 0xf;
+                const binary = ((hmacArray[offset] & 0x7f) << 24) |
+                               ((hmacArray[offset + 1] & 0xff) << 16) |
+                               ((hmacArray[offset + 2] & 0xff) << 8) |
+                               (hmacArray[offset + 3] & 0xff);
+                
+                return (binary % 1000000).toString().padStart(6, '0');
+            } catch (e) {
+                return "ERRO";
+            }
+        }
+
+        function generateLink() {
+            const secret = document.getElementById('secret-input').value.trim();
+            if (!secret) return alert("Digite o segredo Base32!");
+
+            const exp = Date.now() + 60 * 60 * 1000;
+            const data = { s: secret, exp: exp };
+            const encoded = btoa(JSON.stringify(data));
+            
+            const url = new URL(window.location.href);
+            url.searchParams.set('d', encoded);
+
+            document.getElementById('generated-link').value = url.toString();
+            document.getElementById('link-result').classList.remove('hidden');
+        }
+
+        function copyLink() {
+            const link = document.getElementById('generated-link');
+            link.select();
+            document.execCommand('copy');
+            alert("Link copiado!");
+        }
+
+        async function checkViewLink() {
+            const params = new URLSearchParams(window.location.search);
+            const encoded = params.get('d');
+            
+            if (!encoded) return;
+
+            try {
+                const data = JSON.parse(atob(encoded));
+                
+                if (Date.now() > data.exp) {
+                    alert("⏰ Este link expirou!");
+                    window.location.search = '';
+                    return;
+                }
+
+                document.getElementById('login-screen').classList.add('hidden');
+                const app = document.getElementById('main-app');
+                app.classList.remove('hidden');
+
+                const card = document.querySelector('.card');
+                card.innerHTML = `
+                    <h1>🔑 Authenticator yDxvxd</h1>
+                    <h2>Segredo Base32</h2>
+                    <div class="secret">${data.s}</div>
+                    <h2>Código TOTP (atualiza automaticamente)</h2>
+                    <div id="totp" class="totp">------</div>
+                    <p style="text-align:center; color:#86efac;" id="time-left"></p>
+                `;
+
+                async function updateTOTP() {
+                    const code = await generateTOTP(data.s);
+                    document.getElementById('totp').textContent = code;
+                    
+                    const remaining = Math.floor((data.exp - Date.now()) / 1000);
+                    const min = Math.floor(remaining / 60);
+                    const sec = remaining % 60;
+                    document.getElementById('time-left').textContent = `Expira em ${min}:${sec.toString().padStart(2,'0')}`;
+                }
+
+                updateTOTP();
+                setInterval(updateTOTP, 1000);
+            } catch(e) {
+                alert("Link inválido");
+            }
+        }
+
+        window.onload = checkViewLink;
+    </script>
+</body>
+</html>
